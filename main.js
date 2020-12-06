@@ -2,54 +2,38 @@ const fs = require("fs");
 
 const info = fs
 	.readFileSync("text.txt", { encoding: "utf-8" })
-	.split("\n")
+	.split("\n\n")
 	.filter((x) => x);
 
-//whole range 0 ~ 127
-//f , R => 0
-//B , L=> 1
-const checkSeat = (str) => {
-	const newStr = str.split("");
-	let row = "";
-	let column = "";
-	for (let i = 0; i < str.length; i++) {
-		if (newStr[i] == "F") {
-			row += 0;
-		} else if (newStr[i] == "B") {
-			row += 1;
-		} else if (newStr[i] == "R") {
-			column += 1;
-		} else if (newStr[i] == "L") {
-			column += 0;
-		}
-	}
-	const num1 = parseInt(row, 2);
-	const num2 = parseInt(column, 2);
-	return num1 * 8 + num2;
-};
+function CommonCharacters(str1, str2) {
+	var strArr1 = Array.from(new Set([...str1]));
+	var strArr2 = Array.from(new Set([...str2]));
 
-function range(start, end) {
-	var ans = [];
-	for (let i = start; i <= end; i++) {
-		ans.push(i);
-	}
-	return ans;
+	var arr = strArr1.filter(function (d, ix) {
+		return strArr2.indexOf(d) != -1;
+	});
+
+	return arr;
 }
+const p1 = info
+	.map((x) => x.replace(/\n/g, "").split(""))
+	.map((x) => new Set(x).size)
+	.reduce((a, b) => a + b);
 
-const IDs = info.map((x) => checkSeat(x));
-
-const p1 = () => {
-	console.log(Math.max(...IDs));
-};
-
-const p2 = () => {
-	//my id is missing
-	//beginning and last not exist
-	//get the whole sorted list, find the not exist num
-	const listOfId = range(Math.min(...IDs), Math.max(...IDs));
-	for (let i of listOfId) {
-		if (!IDs.includes(i)) {
-			console.log(i);
+const p2 = info
+	.map((x) => x.split("\n"))
+	.map((x) => {
+		if (x.length == 1) {
+			return x[0].length;
+		} else {
+			const commonLetter = x.reduce((i, j) => CommonCharacters(i, j));
+			if (commonLetter.length == 0) {
+				return 0;
+			} else {
+				return commonLetter.length;
+			}
 		}
-	}
-};
+	})
+	.reduce((a, b) => a + b);
+
+console.log(p1, p2);
