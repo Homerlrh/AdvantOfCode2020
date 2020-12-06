@@ -5,16 +5,17 @@ const info = fs
 	.split("\n\n")
 	.filter((x) => x);
 
-function CommonCharacters(str1, str2) {
-	var strArr1 = Array.from(new Set([...str1]));
-	var strArr2 = Array.from(new Set([...str2]));
+const CommonCharacters = (str1, str2) => {
+	const strArr1 = Array.from(new Set([...str1]));
+	const strArr2 = Array.from(new Set([...str2]));
 
-	var arr = strArr1.filter(function (d, ix) {
+	let arr = strArr1.filter(function (d, ix) {
 		return strArr2.indexOf(d) != -1;
 	});
 
 	return arr;
-}
+};
+
 const p1 = info
 	.map((x) => x.replace(/\n/g, "").split(""))
 	.map((x) => new Set(x).size)
