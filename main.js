@@ -1,40 +1,60 @@
 const fs = require("fs");
 
-const info = fs
-	.readFileSync("text.txt", { encoding: "utf-8" })
-	.split("\n\n")
-	.filter((x) => x);
+const info = fs.readFileSync("text.txt", { encoding: "utf-8" }).split("\n");
 
-const CommonCharacters = (str1, str2) => {
-	const strArr1 = Array.from(new Set([...str1]));
-	const strArr2 = Array.from(new Set([...str2]));
+const p1 = () => {
+	const obj = {};
 
-	let arr = strArr1.filter(function (d, ix) {
-		return strArr2.indexOf(d) != -1;
+	info.forEach((x) => {
+		const [a, bag, contain] = /(\w+ \w+) bags contain (.*)\./.exec(x);
+		const containBag =
+			contain !== "no other bags"
+				? contain.split(", ").map((other) => /(\w+ \w+) bags?/.exec(other)[1])
+				: [];
+
+		obj[bag] = new Set(containBag);
 	});
 
-	return arr;
+	const insertColor = (bag) => {
+		let colors = [...obj[bag]];
+		for (const color of [...obj[bag]]) {
+			colors = [...colors, ...insertColor(color)];
+		}
+		return colors;
+	};
+	return Object.keys(obj)
+		.map((x) => insertColor(x))
+		.filter((x) => x.includes("shiny gold")).length;
 };
 
-const p1 = info
-	.map((x) => x.replace(/\n/g, "").split(""))
-	.map((x) => new Set(x).size)
-	.reduce((a, b) => a + b);
+const p2 = () => {
+	const obj = {};
 
-const p2 = info
-	.map((x) => x.split("\n"))
-	.map((x) => {
-		if (x.length == 1) {
-			return x[0].length;
-		} else {
-			const commonLetter = x.reduce((i, j) => CommonCharacters(i, j));
-			if (commonLetter.length == 0) {
-				return 0;
-			} else {
-				return commonLetter.length;
-			}
+	info.forEach((x) => {
+		const [a, bag, contain] = /(\w+ \w+) bags contain (.*)\./.exec(x);
+		const containBag =
+			contain !== "no other bags"
+				? contain.split(", ").map((other) => {
+						const [, units, color] = /(\d+) (\w+ \w+) bags?/.exec(other);
+						return { units: parseInt(units), color };
+				  })
+				: [];
+		obj[bag] = new Set(containBag);
+	});
+
+	const b = new Map();
+	for (const i in obj) {
+		b.set(i, [...obj[i]]);
+	}
+	const calBag = (bag) => {
+		let total = 0;
+		for (const { color, units } of b.get(bag)) {
+			total += units + units * calBag(color);
 		}
-	})
-	.reduce((a, b) => a + b);
+		return total;
+	};
 
-console.log(p1, p2);
+	return calBag("shiny gold");
+};
+
+console.log(p1(), p2());
