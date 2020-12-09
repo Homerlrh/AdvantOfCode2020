@@ -1,71 +1,44 @@
 const fs = require("fs");
 
-const info = fs.readFileSync("text.txt", { encoding: "utf-8" }).split("\r\n");
+const info = fs
+	.readFileSync("text.txt", { encoding: "utf-8" })
+	.split("\n")
+	.map(Number);
 
-const p1 = () => {
-	const isVisited = [];
-	let currentIndex = 0;
-	let acc = 0;
-	while (!isVisited.includes(currentIndex)) {
-		isVisited.push(currentIndex);
-		const [k, v] = info[currentIndex].split(" ");
-		if (k == "nop") {
-			currentIndex++;
-		} else {
-			const num = parseInt(v);
-			if (k == "acc") {
-				acc += num;
-				currentIndex++;
-			} else {
-				currentIndex += num;
-			}
-		}
-	}
-	console.log(acc);
-};
+let preamble = 25;
 
-const p2 = () => {
-	// just need to change one at a time
-	// get all the combo
-	const p2Array = info.map((x, i, a) => {
-		const array = [...a];
-		if (x.includes("nop")) {
-			x = x.replace("nop", "jmp");
-		} else if (x.includes("jmp")) {
-			x = x.replace("jmp", "nop");
-		} else {
-			x = x;
-		}
-		array[i] = x;
-		return array;
-	});
-
-	p2Array.forEach((x) => {
-		let isVisited = [];
-		let currentIndex = 0;
-		let acc = 0;
-		while (!isVisited.includes(currentIndex)) {
-			isVisited.push(currentIndex);
-			const [k, v] = x[currentIndex].split(" ");
-			if (k == "nop") {
-				currentIndex++;
-			} else {
-				const num = parseInt(v);
-				if (k == "acc") {
-					acc += num;
-					currentIndex++;
-				} else {
-					currentIndex += num;
-				}
-			}
-			//get travel from top to bottom
-			if (currentIndex == x.length) {
-				console.log(acc);
+const p1 = (from, to, ind) => {
+	let actual = info[ind];
+	let poss = info.slice(from, to);
+	let found = false;
+	for (let i = 0; i < poss.length; i++) {
+		for (let j = 0; j < poss.length; j++) {
+			if (poss[i] + poss[j] == actual) {
+				found = true;
 				break;
 			}
 		}
-	});
+	}
+	return found ? p1(from + 1, to + 1, ind + 1) : actual;
 };
 
-p1();
-p2();
+let l = -1;
+const hitValue = p1(0, preamble, preamble);
+
+const p2 = () => {
+	for (let i = 0; i < info.length; i++) {
+		l++;
+		for (let j = 3; j < info.length - 3; j++) {
+			let z = info.slice(i, l + j);
+			let sumOfThree = z.reduce((a, b) => a + b);
+			if (sumOfThree == hitValue) {
+				return Math.min(...z) + Math.max(...z);
+			} else if (sumOfThree > hitValue) {
+				j = info.length;
+			}
+		}
+	}
+};
+
+console.log("p1", hitValue);
+console.log("p2", p2());
