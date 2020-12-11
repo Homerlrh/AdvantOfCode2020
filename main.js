@@ -5,40 +5,23 @@ const info = fs
 	.split("\n")
 	.map(Number);
 
-let preamble = 25;
+info.push(0);
+info.push(Math.max(...info) + 3);
 
-const p1 = (from, to, ind) => {
-	let actual = info[ind];
-	let poss = info.slice(from, to);
-	let found = false;
-	for (let i = 0; i < poss.length; i++) {
-		for (let j = 0; j < poss.length; j++) {
-			if (poss[i] + poss[j] == actual) {
-				found = true;
-				break;
-			}
-		}
+let newInfo = info.sort(function (a, b) {
+	return a - b;
+});
+
+const p1 = () => {
+	let l = 0;
+	const jolt = { 1: 0, 2: 0, 3: 0 };
+	for (const i of newInfo) {
+		const diff = i - l;
+		jolt[diff]++;
+		l = i;
 	}
-	return found ? p1(from + 1, to + 1, ind + 1) : actual;
+	return jolt[3] * jolt[1];
 };
 
-let l = -1;
-const hitValue = p1(0, preamble, preamble);
-
-const p2 = () => {
-	for (let i = 0; i < info.length; i++) {
-		l++;
-		for (let j = 3; j < info.length - 3; j++) {
-			let z = info.slice(i, l + j);
-			let sumOfThree = z.reduce((a, b) => a + b);
-			if (sumOfThree == hitValue) {
-				return Math.min(...z) + Math.max(...z);
-			} else if (sumOfThree > hitValue) {
-				j = info.length;
-			}
-		}
-	}
-};
-
-console.log("p1", hitValue);
-console.log("p2", p2());
+//console.log(p1());
+console.log(info);
