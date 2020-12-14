@@ -23,5 +23,20 @@ const p1 = () => {
 	return jolt[3] * jolt[1];
 };
 
-//console.log(p1());
-console.log(info);
+let memo = {};
+const p2 = (array) => {
+	let comb = 1;
+	if (array in memo) {
+		return memo[array];
+	}
+	for (let i = 1; i < array.length - 1; i++) {
+		if (array[i + 1] - array[i - 1] <= 3) {
+			const arr2 = [array[i - 1], ...array.slice(i + 1)];
+			comb += p2(arr2);
+		}
+	}
+	memo[array] = comb;
+	return comb;
+};
+
+console.log(p2(info));
