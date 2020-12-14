@@ -3,25 +3,73 @@ const fs = require("fs");
 const info = fs
 	.readFileSync("text.txt", { encoding: "utf-8" })
 	.split("\n")
-	.map(Number);
+	.map((x) => x.replace("\r", ""));
 
-info.push(0);
-info.push(Math.max(...info) + 3);
+class seating {
+	constructor(lines) {
+		this.height = lines.length;
+		this.width = lines[0].length;
 
-let newInfo = info.sort(function (a, b) {
-	return a - b;
-});
-
-const p1 = () => {
-	let l = 0;
-	const jolt = { 1: 0, 2: 0, 3: 0 };
-	for (const i of newInfo) {
-		const diff = i - l;
-		jolt[diff]++;
-		l = i;
+		this.seats = lines;
 	}
-	return jolt[3] * jolt[1];
-};
 
-//console.log(p1());
-console.log(info);
+	nextState() {
+		let hasChanged = false;
+
+		const updatedSeats = [];
+
+		this.seats.forEach((line, y) => {
+			let updated = "";
+
+			[...line].forEach((seat, x) => {
+				let occupied = 0;
+				for (let i = -1; i <= 1; i++) {
+					for (let j = -1; j <= 1; j++) {
+						if (
+							(i != 0 || j != 0) &&
+							y + i >= 0 &&
+							y + i < this.height &&
+							x + j >= 0 &&
+							x + j < this.width &&
+							this.seats[y + i][x + j] === "#"
+						) {
+							occupied++;
+						}
+					}
+				}
+				if (seat == "L" && occupied === 0) {
+					updated += "#";
+					hasChanged = true;
+				} else if (seat === "#" && occupied >= 4) {
+					updated += "L";
+					hasChanged = true;
+				} else {
+					updated += seat;
+				}
+			});
+			updatedSeats.push(updated);
+		});
+
+		this.seats = updatedSeats;
+
+		return hasChanged;
+	}
+
+	getOccupiedSeats() {
+		let occupied = 0;
+		this.seats.forEach((line) => {
+			[...line].forEach((seat) => {
+				if (seat === "#") {
+					occupied++;
+				}
+			});
+		});
+		return occupied;
+	}
+}
+
+const s = new seating(info);
+
+while (s.nextState()) {}
+
+console.log(s.getOccupiedSeats());
